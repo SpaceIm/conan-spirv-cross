@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conans import ConanFile, CMake, tools
@@ -128,10 +129,17 @@ class SpirvCrossConan(ConanFile):
             self.copy(pattern="spirv-cross*", dst="bin", src=os.path.join("build_subfolder_exe", "bin"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" and self.options.shared:
+            for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+                os.remove(pdb_file)
+            for ilk_file in glob.glob(os.path.join(self.package_folder, "bin", "*.ilk")):
+                os.remove(ilk_file)
 
     def package_info(self):
-        # TODO: add components when available
+        # TODO: set targets names when components available in conan
         self.cpp_info.libs = self._get_ordered_libs()
+        if self.settings.os == "Linux" and self.options.glsl:
+            self.cpp_info.defines.append("m")
         if self.options.build_executable:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
