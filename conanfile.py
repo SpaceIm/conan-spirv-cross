@@ -17,6 +17,7 @@ class SpirvCrossConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_executable": [True, False],
         "glsl": [True, False],
         "hlsl": [True, False],
         "msl": [True, False],
@@ -28,6 +29,7 @@ class SpirvCrossConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_executable": True,
         "glsl": True,
         "hlsl": True,
         "msl": True,
@@ -69,6 +71,8 @@ class SpirvCrossConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
+        if self.options.build_executable and not self._are_proper_binaries_available_for_executable:
+            self._build_exe()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -77,7 +81,7 @@ class SpirvCrossConan(ConanFile):
         self._cmake.definitions["SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"] = False
         self._cmake.definitions["SPIRV_CROSS_SHARED"] = self.options.shared
         self._cmake.definitions["SPIRV_CROSS_STATIC"] = not self.options.shared
-        self._cmake.definitions["SPIRV_CROSS_CLI"] = False # Packaged in another recipe (it requires static build with most options enabled)
+        self._cmake.definitions["SPIRV_CROSS_CLI"] = self.options.build_executable and self._are_proper_binaries_available_for_executable
         self._cmake.definitions["SPIRV_CROSS_ENABLE_TESTS"] = False
         self._cmake.definitions["SPIRV_CROSS_ENABLE_GLSL"] = self.options.glsl
         self._cmake.definitions["SPIRV_CROSS_ENABLE_HLSL"] = self.options.hlsl
@@ -91,16 +95,45 @@ class SpirvCrossConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    @property
+    def _are_proper_binaries_available_for_executable(self):
+        return (not self.options.shared and self.options.glsl and self.options.hlsl
+                and self.options.msl and self.options.cpp and self.options.reflect
+                and self.options.util)
+
+    def _build_exe(self):
+        cmake = CMake(self)
+        cmake.definitions["SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS"] = False
+        cmake.definitions["SPIRV_CROSS_SHARED"] = False
+        cmake.definitions["SPIRV_CROSS_STATIC"] = True
+        cmake.definitions["SPIRV_CROSS_CLI"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_TESTS"] = False
+        cmake.definitions["SPIRV_CROSS_ENABLE_GLSL"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_HLSL"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_MSL"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_CPP"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_REFLECT"] = True
+        cmake.definitions["SPIRV_CROSS_ENABLE_C_API"] = False
+        cmake.definitions["SPIRV_CROSS_ENABLE_UTIL"] = True
+        cmake.definitions["SPIRV_CROSS_SKIP_INSTALL"] = True
+        cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = False
+        cmake.configure(build_folder="build_subfolder_exe")
+        cmake.build()
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.options.build_executable and not self._are_proper_binaries_available_for_executable:
+            self.copy(pattern="spirv-cross*", dst="bin", src=os.path.join("build_subfolder_exe", "bin"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         # TODO: add components when available
         self.cpp_info.libs = self._get_ordered_libs()
+        if self.options.build_executable:
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     def _get_ordered_libs(self):
         libs = []
