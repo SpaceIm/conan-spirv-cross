@@ -142,6 +142,8 @@ class SpirvCrossConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "spirv_cross"))
         if self.settings.os == "Linux" and self.options.glsl:
             self.cpp_info.system_libs.append("m")
+        if not self.options.shared and self.options.c_api and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
         if self.options.build_executable:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
