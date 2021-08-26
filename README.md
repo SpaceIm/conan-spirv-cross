@@ -2,9 +2,9 @@
 
 ## Package Status
 
-| Windows | Linux | macOS |
-|:-------:|:-----:|:-----:|
-|[![Build status](https://ci.appveyor.com/api/projects/status/410mnejvsyc87by0/branch/testing%2F20200917?svg=true)](https://ci.appveyor.com/project/SpaceIm/conan-spirv-cross)|[![Build status](https://github.com/SpaceIm/conan-spirv-cross/workflows/.github/workflows/conan.yml/badge.svg?branch=testing%2F20200917)](https://github.com/SpaceIm/conan-spirv-cross/actions?query=branch%3Atesting%2F20200917)|[![Build Status](https://travis-ci.com/SpaceIm/conan-spirv-cross.svg?branch=testing%2F20200917)](https://travis-ci.com/SpaceIm/conan-spirv-cross)|
+| Windows (Visual Studio) | Linux | macOS |
+|:-----------------------:|:-----:|:-----:|
+|[![Build status](https://github.com/SpaceIm/conan-spirv-cross/workflows/.github/workflows/windows.yml/badge.svg?branch=testing%2F20200917)](https://github.com/SpaceIm/conan-spirv-cross/actions/workflows/windows.yml?query=branch%3Atesting%2F20200917)|[![Build status](https://github.com/SpaceIm/conan-spirv-cross/workflows/.github/workflows/linux.yml/badge.svg?branch=testing%2F20200917)](https://github.com/SpaceIm/conan-spirv-cross/actions/workflows/linux.yml?query=branch%3Atesting%2F20200917)|[![Build status](https://github.com/SpaceIm/conan-spirv-cross/workflows/.github/workflows/macos.yml/badge.svg?branch=testing%2F20200917)](https://github.com/SpaceIm/conan-spirv-cross/actions/workflows/macos.yml?query=branch%3Atesting%2F20200917)|
 
 ## Description
 
